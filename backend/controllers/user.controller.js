@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 export const register = async (req, res) => {
   try {
     const { fullname, email, phoneNumber, password, role } = req.body;
+    
     if (!fullname || !email || !phoneNumber || !password || !role) {
       return res.status(400).json({
         message: "Something is missing",
@@ -28,7 +29,7 @@ export const register = async (req, res) => {
       email,
       phoneNumber,
       password: hashedPassword,
-      role,
+      role:role.toLowerCase(),
     });
     return res.status(201).json({
       message: "Acount created successfully",
@@ -36,6 +37,7 @@ export const register = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+     return res.status(500).json({ message: "Internal server error", success: false });
   }
 };
 
@@ -67,7 +69,7 @@ export const login = async (req, res) => {
     };
 
     //Check role is correct or not 
-    if (role !== user.role) {
+    if (role.toLowerCase() !== user.role.toLowerCase()) {
       return res.status(400).json({
         message: "Account doesn't exist with current role. ",
         success: false
@@ -88,8 +90,8 @@ export const login = async (req, res) => {
       profile: user.profile
     }
 
-    return res.status(200).cookie("token", token, { maxAge: 1 * 24 * 60 * 60 * 1000, httpsOnly: true, sameSite: 'strict' }).json({
-      message: `${user.fullname}`,
+    return res.status(200).cookie("token", token, { maxAge: 1 * 24 * 60 * 60 * 1000, httpOnly: true, sameSite: 'strict' }).json({
+      message: `Welcome ${user.fullname}`,
       success: true
     })
 
@@ -113,6 +115,7 @@ export const logout = async (req,res) => {
 export const updateProfile = async (req,res) => {
   try { 
      const {fullname, email, phoneNumber, bio, skills} = req.body;
+     console.log(fullname, email,phoneNumber, bio, skills);
      const file = req.file;
 
      //Cloudinary 
@@ -121,7 +124,9 @@ export const updateProfile = async (req,res) => {
      skillsArray = skills.split(",");
      }
      const userId = req.id; //middleware Authentication
-     let user = await User.findById(userId);
+    //  let user = await User.findById(userId);
+      let user = await User.findOne({ email });
+
 
      if(!user){
       return res.status(400).json({
