@@ -99,7 +99,6 @@ export const login = async (req, res) => {
 }
 
 //User logout
-
 export const logout = async (req,res) => {
   try {
     return res.status(200).cookie("token", "", {maxAge:0}).json({
@@ -111,5 +110,49 @@ export const logout = async (req,res) => {
   }
 }
 
+export const updateProfile = async (req,res) => {
+  try { 
+     const {fullname, email, phoneNumber, bio, skills} = req.body;
+     const file = req.file;
 
+     //Cloudinary 
+      let skillsArray;
+     if(skills){
+     skillsArray = skills.split(",");
+     }
+     const userId = req.id; //middleware Authentication
+     let user = await User.findById(userId);
+
+     if(!user){
+      return res.status(400).json({
+        message : "User not found.",
+        success : false
+      })
+     }
+     //Updating the data 
+     if(fullname) user.fullname = fullname
+     if(email) user.email = email
+     if(phoneNumber) user.phoneNumber = phoneNumber
+     if(bio) user.profile.bio = bio
+     if(skills) user.profile.skills = skillsArray
+
+     await user.save();
+
+      user = {
+      _id: user._id,
+      fullname: user.fullname,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      role: user.role,
+      profile: user.profile
+    }
+    return res.status(200).json({
+      message : "Profile update successfully",
+      user,
+      success : true 
+    })
+  } catch (error){
+      console.log(error);
+  }
+}
 
