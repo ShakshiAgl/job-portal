@@ -48,7 +48,8 @@ export const login = async (req, res) => {
     if (!email || !password || !role) {
       return res.status(400).json({
         message: "Something is missing",
-        success: false
+        success: false,
+      
       });
     }
 
@@ -90,9 +91,16 @@ export const login = async (req, res) => {
       profile: user.profile
     }
 
-    return res.status(200).cookie("token", token, { maxAge: 1 * 24 * 60 * 60 * 1000, httpOnly: true, sameSite: 'strict' }).json({
+    return res
+    .status(200)
+    .cookie("token", token, {
+       maxAge: 1 * 24 * 60 * 60 * 1000, httpOnly: true, sameSite: 'strict'
+       })
+       .json({
       message: `Welcome ${user.fullname}`,
-      success: true
+      success: true,
+      user,
+      token
     })
 
   } catch (error) {
@@ -105,7 +113,8 @@ export const logout = async (req,res) => {
   try {
     return res.status(200).cookie("token", "", {maxAge:0}).json({
       message: "Logged out successfull",
-      success : true
+      success : true,
+    
     })
   } catch (error) {
     console.log(error);
