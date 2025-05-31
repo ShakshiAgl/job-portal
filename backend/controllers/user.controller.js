@@ -125,7 +125,6 @@ export const logout = async (req,res) => {
 export const updateProfile = async (req,res) => {
   try { 
      const {fullname, email, phoneNumber, bio, skills} = req.body;
-     console.log(fullname, email,phoneNumber, bio, skills);
      const file = req.file;
 
      //Cloudinary 
@@ -133,7 +132,7 @@ export const updateProfile = async (req,res) => {
      if(skills){
      skillsArray = skills.split(",");
      }
-     const userId = req.id; 
+     const userId = req.id;  
       let user = await User.findOne({ email });
 
 
