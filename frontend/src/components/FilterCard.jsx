@@ -1,7 +1,7 @@
 const filterData = [
   {
     filterType: 'Location',
-    array: ['Delhi NCR', 'Bangalore', 'Hyderabad', 'Pune', 'Mumbai'],
+    array: ['Kathmandu', 'Nepalgunj', 'Pokhara', 'Butwal', 'Birgunj'],
   },
   {
     filterType: 'Industry',

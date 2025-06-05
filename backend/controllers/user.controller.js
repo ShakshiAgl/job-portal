@@ -14,6 +14,7 @@ export const register = async (req, res) => {
       });
     }
 
+    
     const user = await User.findOne({ email });
     if (user) {
       return res.status(400).json({
@@ -36,8 +37,12 @@ export const register = async (req, res) => {
       success: true
     });
   } catch (error) {
-    console.log(error);
-     return res.status(500).json({ message: "Internal server error", success: false });
+     
+     return res.status(500).json({
+     message: "Internal server error",
+     success: false 
+
+     });
   }
 };
 
@@ -125,16 +130,17 @@ export const logout = async (req,res) => {
 export const updateProfile = async (req,res) => {
   try { 
      const {fullname, email, phoneNumber, bio, skills} = req.body;
-     const file = req.file;
 
-     //Cloudinary 
-      let skillsArray;
+     const file = req.file;
+     const fileUri = getDataUri(file);
+     const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
+
+    let skillsArray;
      if(skills){
      skillsArray = skills.split(",");
      }
      const userId = req.id;  
       let user = await User.findOne({ email });
-
 
      if(!user){
       return res.status(400).json({
@@ -148,6 +154,11 @@ export const updateProfile = async (req,res) => {
      if(phoneNumber) user.phoneNumber = phoneNumber
      if(bio) user.profile.bio = bio
      if(skills) user.profile.skills = skillsArray
+
+     if(cloudResponse){
+          user.profile.resume = cloudResponse.secure_url //save the cloudinary url
+          user.profile.resumeOriginalName = file.originalname //save the original filename 
+     }
 
      await user.save();
 
@@ -166,6 +177,7 @@ export const updateProfile = async (req,res) => {
     })
   } catch (error){
       console.log(error);
+
   }
 }
 

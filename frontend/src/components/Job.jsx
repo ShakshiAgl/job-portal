@@ -34,7 +34,7 @@ const Job = () => {
 
       {/* Job Title & Description */}
       <div className="mb-4">
-        <h1 className="font-bold text-lg text-gray-900 mb-2">Senior Frontend Developer</h1>
+        <h1 className="font-bold text-lg text-gray-900 mb-2">Full Stack Developer</h1>
         <p className="text-sm text-gray-600 leading-relaxed">
           We are seeking a skilled Frontend Developer to join our team. You’ll work on exciting projects with cutting-edge technologies and collaborate with a team of passionate engineers.
         </p>
