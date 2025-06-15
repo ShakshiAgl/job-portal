@@ -1,43 +1,137 @@
-import React from 'react'
-import { Badge } from './ui/badge'
-import { Button } from './ui/button'
+import React, { useEffect, useState } from 'react';
+import { Badge } from './ui/badge';
+import { Button } from './ui/button';
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
+import { APPLICATION_API_END_POINT, JOB_API_END_POINT } from '@/utils/constant';
+import { setSingleJob } from '@/redux/jobSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'sonner';
 
 const JobDescription = () => {
-  const isApplied = true;
+  const { singleJob } = useSelector((store) => store.job);
+  const { user } = useSelector((store) => store.auth);
+  const [isApplied, setIsApplied] = useState(false);
+
+  const params = useParams();
+  const jobId = params.id;
+  const dispatch = useDispatch();
+
+  const applyJobHandler = async () => {
+    try {
+      const res = await axios.get(`${APPLICATION_API_END_POINT}/apply/${jobId}`, {
+        withCredentials: true,
+      });
+      console.log(res.data);
+
+      if (res.data.success) {
+        setIsApplied(true); // Update local state
+        const updatedJob = {
+          ...singleJob,
+          applications: [...(singleJob?.applications || []), { applicant: user._id }],
+        };
+        dispatch(setSingleJob(updatedJob)); // Real-time update
+        toast.success(res.data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error?.response?.data?.message || 'Something went wrong.');
+    }
+  };
+
+  useEffect(() => {
+    const fetchSingleJob = async () => {
+      try {
+        const res = await axios.get(`${JOB_API_END_POINT}/get/${jobId}`, {
+          withCredentials: true,
+        });
+        if (res.data.success) {
+          dispatch(setSingleJob(res.data.job));
+          const hasApplied = res.data.job?.applications?.some(
+            (application) => application.applicant === user?._id
+          );
+          setIsApplied(hasApplied);
+        }
+      } catch (error) {
+        console.log(error);
+        toast.error('Failed to load job details.');
+      }
+    };
+
+    fetchSingleJob();
+  }, [jobId, dispatch, user?._id]);
+
   return (
-    <div className='max-w-7xl mx-auto my-10'>
-      <div className='flex items-center justify-between'>
+    <div className="max-w-5xl mx-auto my-12 px-4">
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className='font-bold text-xl'>Title</h1>
-          <div className='flex items-center gap-2 mt-4'>
-            <Badge className="bg-gray-100 text-gray-700 font-medium px-3 py-1 rounded-full text-xs" variant="ghost">
-              12 Positions
+          <h1 className="text-3xl font-bold text-gray-800">{singleJob?.title}</h1>
+          <div className="flex flex-wrap gap-3 mt-3">
+            <Badge className="bg-teal-100 text-teal-700 font-semibold px-3 py-1 rounded-full text-sm hover:bg-teal-600 hover:text-white transition-colors duration-200">
+              {singleJob?.position} Position(s)
             </Badge>
-            <Badge className="bg-gray-100 text-gray-700 font-medium px-3 py-1 rounded-full text-xs" variant="ghost">
-              Part Time
+            <Badge className="bg-blue-100 text-blue-700 font-semibold px-3 py-1 rounded-full text-sm hover:bg-blue-600 hover:text-white transition-colors duration-200">
+              {singleJob?.jobType}
             </Badge>
-            <Badge className="bg-gray-100 text-gray-700 font-medium px-3 py-1 rounded-full text-xs" variant="ghost">
-              24 LPA
+            <Badge className="bg-green-100 text-green-700 font-semibold px-3 py-1 rounded-full text-sm hover:bg-green-600 hover:text-white transition-colors duration-200">
+              {singleJob?.salary}
             </Badge>
           </div>
         </div>
-        <Button disabled={isApplied}
-          className={`rounded-lg ${isApplied ? 'bg-gray-600 cursor-not-allowed' : 'bg-[#0e7777] hover:bg-[#5b8888]'}`}>
+        <Button
+          onClick={isApplied ? null : applyJobHandler}
+          disabled={isApplied}
+          className={`rounded-lg px-6 py-2 text-base font-semibold ${
+            isApplied
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-[#0e7777] hover:bg-[#096363] text-white'
+          }`}
+        >
           {isApplied ? 'Already Applied' : 'Apply Now'}
         </Button>
       </div>
-      <h1 className='border b-2 border-b-gray-300 font-medium py-4'>Job Description</h1>
-      <div className='my-4'>
-        <h1 className='my-1 font-medium text2xl'>Role: <span className='pl-4 font-normal text-gray-800'> Frontend Developer </span></h1>
-        <h1 className='my-1 font-normal text-2xl'>Location: <span className='pl-4 font-normal text-gray-800'> Hyderabad </span></h1>
-        <h1 className='my-1 font-normal text-2xl'>Description: <span className='pl-4 font-normal text-gray-800'> Please submit your resume  </span></h1>
-        <h1 className='my-1 font-normal text-2xl'>Experience: <span className='pl-4 font-normal text-gray-800'> 2 yrs </span></h1>
-        <h1 className='my-1 font-normal text-2xl'>Salary: <span className='pl-4 font-normal text-gray-800'> 12LPA </span></h1>
-        <h1 className='my-1 font-normal text-2xl'>Total Application: <span className='pl-4 font-normal text-gray-800'> 4 </span></h1>
-        <h1 className='my-1 font-normal text-2xl'>Posted Date: <span className='pl-4 font-normal text-gray-800'> 19-05-2025 </span></h1>
+
+      <div className="bg-white p-6 rounded-xl shadow-md border">
+        <h2 className="text-2xl font-semibold text-gray-700 border-b pb-3 mb-6">Job Overview</h2>
+        <div className="space-y-4 text-lg text-gray-800">
+          <p>
+            <strong>Role:</strong>{' '}
+            <span className="pl-2 text-gray-700">{singleJob?.title}</span>
+          </p>
+          <p>
+            <strong>Location:</strong>{' '}
+            <span className="pl-2 text-gray-700">{singleJob?.location}</span>
+          </p>
+          <p>
+            <strong>Description:</strong>{' '}
+            <span className="pl-2 text-gray-700">{singleJob?.description}</span>
+          </p>
+          <p>
+            <strong>Experience Required:</strong>{' '}
+            <span className="pl-2 text-gray-700">
+              {singleJob?.experience ?? 'Not specified'} yrs
+            </span>
+          </p>
+          <p>
+            <strong>Salary Offered:</strong>{' '}
+            <span className="pl-2 text-gray-700">{singleJob?.salary}</span>
+          </p>
+          <p>
+            <strong>Total Applications:</strong>{' '}
+            <span className="pl-2 text-gray-700">
+              {singleJob?.applications?.length ?? 0}
+            </span>
+          </p>
+          <p>
+            <strong>Posted Date:</strong>{' '}
+            <span className="pl-2 text-gray-700">
+              {singleJob?.createdAt?.split('T')[0]}
+            </span>
+          </p>
+        </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default JobDescription
+export default JobDescription;

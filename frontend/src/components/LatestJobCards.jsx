@@ -1,7 +1,7 @@
 import React from 'react'
 import { Badge } from './ui/badge'
 
-const LatestJobCards = () => {
+const LatestJobCards = ({ job }) => {
   return (
     <div
       className='p-6 rounded-2xl bg-white border border-gray-100 transition-all duration-300 ease-in-out cursor-pointer hover:scale-[1.01]'
@@ -15,27 +15,32 @@ const LatestJobCards = () => {
       }}
     >
       <div>
-        <h1 className='font-medium text-lg'>Company Name</h1>
+        <h1 className='font-medium text-lg'>{job?.company?.name}</h1>
         <p className='text-sm text-gray-500'>Nepal</p>
       </div>
 
       <div>
-        <h1 className='font-bold text-lg my-2'>Job Title</h1>
-        <p className='text-sm text-gray-500'>
-          Lorem ipsum dolor, sit amet consectetur adipisicing elit. Sit non
-          dolor in culpa libero obcaecati.
+        <h1 className='font-bold text-lg my-2'>{job?.title}</h1>
+        <p className='text-sm text-gray-500 line-clamp-3'>
+          {job?.description}
         </p>
       </div>
 
       <div className='flex items-center gap-2 mt-4 flex-wrap'>
-        <Badge className='text-[#0f3636] font-bold bg-[#e6e6e6]' variant="ghost">
-          12 Positions
+        <Badge
+          className="bg-teal-100 text-teal-700 font-semibold px-3 py-1 rounded-full text-sm hover:bg-teal-600 hover:text-white transition-colors duration-200"
+        >
+          {job?.position} Position(s)
         </Badge>
-        <Badge className='text-[#0f3636] font-bold bg-[#e6e6e6]' variant="ghost">
-          Part Time
+        <Badge
+          className="bg-blue-100 text-blue-700 font-semibold px-3 py-1 rounded-full text-sm hover:bg-blue-600 hover:text-white transition-colors duration-200"
+        >
+          {job?.jobType}
         </Badge>
-        <Badge className='text-[#0f3636] font-bold bg-[#e6e6e6]' variant="ghost">
-          24 LPA
+        <Badge
+          className="bg-green-100 text-green-700 font-semibold px-3 py-1 rounded-full text-sm hover:bg-green-600 hover:text-white transition-colors duration-200"
+        >
+          {job?.salary}
         </Badge>
       </div>
     </div>

@@ -165,7 +165,8 @@ const Signup = () => {
                  {
                loading ? <Button className="w-full my-4"> <Loader2 className='mr-2 h-4 w-4 animate-spin'/>             Please wait</Button> : <Button type="submit" className="w-full my-4 bg-[#217272]">Sign up</Button>
             }
-            <span className="text-sm">Already have an account? <Link to="/login" className="text-[#217272] hover:text-[#102e2e]">Login</Link></span>
+            <span className="text-sm">Already have an account? <Link to="/login" className="text-[#217272]
+             hover:text-[#102e2e]">Login</Link></span>
           </form>
         </div>
       </div>

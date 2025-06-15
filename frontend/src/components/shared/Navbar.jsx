@@ -9,9 +9,13 @@ import { Button } from '../ui/button';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { setUser } from '@/redux/authSlice';
+import { USER_API_END_POINT } from '@/utils/constant';
+import { toast } from 'sonner';
+import axios from 'axios';
 
 const Navbar = () => {
   const { user } = useSelector((store) => store.auth);
+
   const isAuthenticated = !!user;
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -20,11 +24,20 @@ const Navbar = () => {
     console.log('Redux Auth State:', { user, isAuthenticated });
   }, [user, isAuthenticated]);
 
-  const handleLogout = () => {
-    dispatch(setUser(null));
-    localStorage.removeItem('user');
-    navigate('/login');
-  };
+  const logoutHandler = async () => {
+   try {
+      const res = await axios.get(`${USER_API_END_POINT}/logout`,{withCredentials : true });
+      if(res.data.success){
+        dispatch(setUser(null));
+        navigate("/");
+        toast.success(res.data.message);
+      }
+   } 
+   catch (error){
+    console.log(error);
+    toast.error(error.response.data.message);
+   }
+  }
 
   return (
     <div className="bg-white shadow">
@@ -86,7 +99,7 @@ const Navbar = () => {
                 <div className="cursor-pointer">
                   <Avatar>
                     <AvatarImage
-                      src={user?.avatarUrl || 'https://avatars.githubusercontent.com/u/9919?v=4'}
+                      src= {user?.profile?.profilePhoto}
                       alt={user?.fullname || 'User'}
                       className="w-10 h-10 rounded-full"
                     />
@@ -97,7 +110,7 @@ const Navbar = () => {
               <PopoverContent className="bg-white border rounded-md shadow-md p-4 w-60 z-50">
                 <div className="flex items-center gap-3">
                   <img 
-                    src={user?.avatarUrl || 'https://avatars.githubusercontent.com/u/9919?v=4'}
+                    src= {user?.profile?.profilePhoto}
                     alt={user?.fullname || 'User'}
                     className="w-10 h-10 rounded-full"
                   />
@@ -122,10 +135,9 @@ const Navbar = () => {
                   </Link>
 
                   <div 
-                    onClick={handleLogout}
+                   onClick={logoutHandler}
                     className="flex items-center gap-2 cursor-pointer [#217272] hover:text-[#000000] font-semibold text-[#217272]"
                   >
-
                     <span>🚪</span>
                     <span>Logout</span>
                   </div>
