@@ -7,11 +7,13 @@ import { APPLICATION_API_END_POINT, JOB_API_END_POINT } from '@/utils/constant';
 import { setSingleJob } from '@/redux/jobSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
+import UpdateProfileDialog from './UpdateProfileDialog';
 
 const JobDescription = () => {
-  const { singleJob } = useSelector((store) => store.job);
-  const { user } = useSelector((store) => store.auth);
-  const [isApplied, setIsApplied] = useState(false);
+  const { singleJob } = useSelector(store => store.job);
+  const { user } = useSelector(store => store.auth);
+  const isInitiallyApplied = singleJob?.applications?.some(application => application.applicant === user?._id) || false;
+  const [isApplied, setIsApplied] = useState(isInitiallyApplied);
 
   const params = useParams();
   const jobId = params.id;
@@ -19,25 +21,18 @@ const JobDescription = () => {
 
   const applyJobHandler = async () => {
     try {
-      const res = await axios.get(`${APPLICATION_API_END_POINT}/apply/${jobId}`, {
-        withCredentials: true,
-      });
-      console.log(res.data);
-
-      if (res.data.success) {
-        setIsApplied(true); // Update local state
-        const updatedJob = {
-          ...singleJob,
-          applications: [...(singleJob?.applications || []), { applicant: user._id }],
-        };
-        dispatch(setSingleJob(updatedJob)); // Real-time update
+      const res = await axios.get(`${APPLICATION_API_END_POINT}/apply/${jobId}`, { withCredentials: true });
+      if(res.data.success){
+        setIsApplied(true);
+        const updateSingleJob = {...singleJob, applications:[...singleJob.applications,{applicant:user?._id}]}
+        dispatch(setSingleJob(updateSingleJob));
         toast.success(res.data.message);
       }
     } catch (error) {
       console.log(error);
-      toast.error(error?.response?.data?.message || 'Something went wrong.');
+      toast.error(error.response.data.message);
     }
-  };
+  }
 
   useEffect(() => {
     const fetchSingleJob = async () => {
@@ -47,17 +42,13 @@ const JobDescription = () => {
         });
         if (res.data.success) {
           dispatch(setSingleJob(res.data.job));
-          const hasApplied = res.data.job?.applications?.some(
-            (application) => application.applicant === user?._id
-          );
-          setIsApplied(hasApplied);
+          setIsApplied(res.data.job.applications.some(application => application.applicant === user?._id))
         }
       } catch (error) {
         console.log(error);
         toast.error('Failed to load job details.');
       }
     };
-
     fetchSingleJob();
   }, [jobId, dispatch, user?._id]);
 
