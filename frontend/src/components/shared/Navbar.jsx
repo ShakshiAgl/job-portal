@@ -15,13 +15,18 @@ import axios from 'axios';
 
 const Navbar = () => {
   const { user } = useSelector((store) => store.auth);
+  console.log("User from Redux:", user);
 
-  const isAuthenticated = !!user;
+  const isAuthenticated = user && Object.keys(user).length > 0;
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
     console.log('Redux Auth State:', { user, isAuthenticated });
+    console.log("User from Redux: ", user);
+    console.log("Type: ", typeof user);
+    console.log("Is Authenticated", isAuthenticated);
+    console.log("Keys: ", Object.keys(user || {}));
   }, [user, isAuthenticated]);
 
   const logoutHandler = async () => {
@@ -99,7 +104,7 @@ const Navbar = () => {
                 <div className="cursor-pointer">
                   <Avatar>
                     <AvatarImage
-                      src= {user?.profile?.profilePhoto}
+                      src= {user?.profile?.profilePhoto || "/default-avatar.png"}
                       alt={user?.fullname || 'User'}
                       className="w-10 h-10 rounded-full"
                     />
@@ -110,7 +115,7 @@ const Navbar = () => {
               <PopoverContent className="bg-white border rounded-md shadow-md p-4 w-60 z-50">
                 <div className="flex items-center gap-3">
                   <img 
-                    src= {user?.profile?.profilePhoto}
+                    src= {user?.profile?.profilePhoto || "/default-avatar.png"}
                     alt={user?.fullname || 'User'}
                     className="w-10 h-10 rounded-full"
                   />
