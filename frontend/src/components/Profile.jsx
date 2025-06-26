@@ -54,13 +54,14 @@ const Profile = () => {
             <span>{user?.phoneNumber}</span>
           </div>
         </div>
+        
         <div className="my-5">
           <h2 className='font-bold text-lg '>Skills</h2>
           <div className="flex items-center gap-2 ">
           {
             user?.profile?.
-         skills.length !==0 ? 
-          user?.profile?.skills.map((item, index) =>
+         skills?.length !==0 ? 
+          user?.profile?.skills?.map((item, index) =>
            <Badge className='bg-[#008e97]'
             key={index}>{item}
             </Badge>)   
@@ -68,6 +69,7 @@ const Profile = () => {
           }
           </div>
         </div>
+
         <div className="grid w-full max-w-sm items-center gap-1.5">
            <Label className="font-bold text-lg ">Resume</Label>
            {

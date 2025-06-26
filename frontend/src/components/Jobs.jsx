@@ -2,7 +2,6 @@ import React from 'react'
 import Navbar from './shared/Navbar'
 import FilterCard from './FilterCard'
 import Job from './Job';
-import store from '@/redux/store';
 import { useSelector } from 'react-redux';
 
 // const jobsArray = [1, 2, 3, 4, 5, 6, 7, 8];

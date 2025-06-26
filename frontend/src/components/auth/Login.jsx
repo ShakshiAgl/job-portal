@@ -11,6 +11,7 @@ import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { setLoading, setUser } from '@/redux/authSlice';
 import { Loader2 } from 'lucide-react';
+import { store } from '@/redux/store';
 
 const Login = () => {
   const [input, setInput] = useState({
@@ -41,12 +42,28 @@ const Login = () => {
 
       console.log("login API response: ", res);
 
-      if (res.data.success) {
-        dispatch(setUser(res.data.user));
-        localStorage.setItem('user', JSON.stringify(res.data.user));
-        toast.success(res.data.message);
-        navigate('/');
-      }
+     if (res.data.success) {
+  const userData = res.data.user;
+
+  // 🧼 Ensure consistent structure for Redux
+  const cleanedUser = {
+    fullname: userData.fullname,
+    role: userData.role,
+    profile: {
+      profilePhoto: userData.profile?.profilePhoto || null,
+    },
+  };
+
+  dispatch(setUser(cleanedUser));
+console.log("User in Redux right after login:", store.getState().auth.user);
+
+
+  localStorage.setItem('user', JSON.stringify(cleanedUser));
+  toast.success(res.data.message);
+  navigate('/');
+}
+
+
     } catch (error) {
       console.error(error);
       toast.error(error.response?.data?.message || 'Login failed');

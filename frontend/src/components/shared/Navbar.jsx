@@ -4,7 +4,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@radix-ui/react-popover';
-import { Avatar, AvatarImage } from '@radix-ui/react-avatar';
+import { Avatar, AvatarImage, AvatarFallback } from '@radix-ui/react-avatar';
 import { Button } from '../ui/button';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -12,37 +12,44 @@ import { setUser } from '@/redux/authSlice';
 import { USER_API_END_POINT } from '@/utils/constant';
 import { toast } from 'sonner';
 import axios from 'axios';
+import { persistor } from '@/redux/store';
+import { store } from '@/redux/store';
 
 const Navbar = () => {
   const { user } = useSelector((store) => store.auth);
-  console.log("User from Redux:", user);
-
-  const isAuthenticated = user && Object.keys(user).length > 0;
+  const isAuthenticated = user !== null;
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const profilePhoto =
+    user?.profile?.profilePhoto?.trim() !== ''
+      ? user?.profile.profilePhoto
+      : `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.fullname || 'User')}&background=0D8ABC&color=fff`;
+
   useEffect(() => {
     console.log('Redux Auth State:', { user, isAuthenticated });
-    console.log("User from Redux: ", user);
-    console.log("Type: ", typeof user);
-    console.log("Is Authenticated", isAuthenticated);
-    console.log("Keys: ", Object.keys(user || {}));
+    console.log('User from Redux: ', user);
+    console.log('Type: ', typeof user);
+    console.log('Is Authenticated', isAuthenticated);
+    console.log('Keys: ', Object.keys(user || {}));
+    console.log('Global Redux Auth User:', store.getState().auth.user);
   }, [user, isAuthenticated]);
 
   const logoutHandler = async () => {
-   try {
-      const res = await axios.get(`${USER_API_END_POINT}/logout`,{withCredentials : true });
-      if(res.data.success){
+    try {
+      const res = await axios.get(`${USER_API_END_POINT}/logout`, {
+        withCredentials: true,
+      });
+      if (res.data.success) {
         dispatch(setUser(null));
-        navigate("/");
+        navigate('/');
         toast.success(res.data.message);
       }
-   } 
-   catch (error){
-    console.log(error);
-    toast.error(error.response.data.message);
-   }
-  }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response.data.message);
+    }
+  };
 
   return (
     <div className="bg-white shadow">
@@ -84,7 +91,6 @@ const Navbar = () => {
             </li>
           </ul>
 
-
           {!isAuthenticated ? (
             <div className="flex items-center gap-2">
               <Link to="/login">
@@ -104,18 +110,19 @@ const Navbar = () => {
                 <div className="cursor-pointer">
                   <Avatar>
                     <AvatarImage
-                      src= {user?.profile?.profilePhoto || "/default-avatar.png"}
+                      src={profilePhoto}
                       alt={user?.fullname || 'User'}
                       className="w-10 h-10 rounded-full"
                     />
+                    <AvatarFallback>👤</AvatarFallback>
                   </Avatar>
                 </div>
               </PopoverTrigger>
 
               <PopoverContent className="bg-white border rounded-md shadow-md p-4 w-60 z-50">
                 <div className="flex items-center gap-3">
-                  <img 
-                    src= {user?.profile?.profilePhoto || "/default-avatar.png"}
+                  <img
+                    src={profilePhoto}
                     alt={user?.fullname || 'User'}
                     className="w-10 h-10 rounded-full"
                   />
@@ -126,21 +133,19 @@ const Navbar = () => {
                     </p>
                     <p className="text-xs text-gray-500">{user?.role || 'Member'}</p>
                   </div>
-
                 </div>
                 <hr className="my-2" />
                 <div className="space-y-2 text-sm">
-
                   <Link
                     to="/profile"
-                    className="flex items-center gap-2 [#217272] hover:text-[#000000] "
+                    className="flex items-center gap-2 [#217272] hover:text-[#000000]"
                   >
                     <span>👤</span>
-                    <span> View Profile</span> 
+                    <span> View Profile</span>
                   </Link>
 
-                  <div 
-                   onClick={logoutHandler}
+                  <div
+                    onClick={logoutHandler}
                     className="flex items-center gap-2 cursor-pointer [#217272] hover:text-[#000000] font-semibold text-[#217272]"
                   >
                     <span>🚪</span>

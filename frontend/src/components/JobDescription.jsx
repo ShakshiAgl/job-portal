@@ -7,56 +7,90 @@ import { APPLICATION_API_END_POINT, JOB_API_END_POINT } from '@/utils/constant';
 import { setSingleJob } from '@/redux/jobSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
-import UpdateProfileDialog from './UpdateProfileDialog';
 
 const JobDescription = () => {
-  const { singleJob } = useSelector(store => store.job);
-  const { user } = useSelector(store => store.auth);
-  const isInitiallyApplied = singleJob?.applications?.some(application => application.applicant === user?._id) || false;
-  const [isApplied, setIsApplied] = useState(isInitiallyApplied);
+  const { singleJob } = useSelector((store) => store.job);
+  const { user } = useSelector((store) => store.auth);
+  const [isApplied, setIsApplied] = useState(false);
 
-  const params = useParams();
-  const jobId = params.id;
+  const { id: jobId } = useParams();
   const dispatch = useDispatch();
 
   const applyJobHandler = async () => {
     try {
-      const res = await axios.get(`${APPLICATION_API_END_POINT}/apply/${jobId}`, { withCredentials: true });
-      if(res.data.success){
+      const res = await axios.get(`${APPLICATION_API_END_POINT}/apply/${jobId}`, {
+        withCredentials: true,
+      });
+
+      if (res.data.success) {
         setIsApplied(true);
-        const updateSingleJob = {...singleJob, applications:[...singleJob.applications,{applicant:user?._id}]}
-        dispatch(setSingleJob(updateSingleJob));
+
+        // Update job in Redux with new applicant
+        const updatedJob = {
+          ...singleJob,
+          applications: [...(singleJob.applications || []), { applicant: user?._id }],
+        };
+
+        dispatch(setSingleJob(updatedJob));
         toast.success(res.data.message);
       }
     } catch (error) {
-      console.log(error);
-      toast.error(error.response.data.message);
+    const errorMessage = error?.response?.data?.message;
+
+    // If already applied, still update state
+    if (errorMessage?.toLowerCase().includes('already applied')) {
+      setIsApplied(true);
     }
+
+    toast.error(errorMessage || 'Something went wrong');
   }
+};
 
   useEffect(() => {
-    const fetchSingleJob = async () => {
+    const fetchJob = async () => {
       try {
         const res = await axios.get(`${JOB_API_END_POINT}/get/${jobId}`, {
           withCredentials: true,
         });
-        if (res.data.success) {
+
+        console.log("Job fetch response:", res.data);
+
+        if (res.data.success && res.data.job) {
           dispatch(setSingleJob(res.data.job));
-          setIsApplied(res.data.job.applications.some(application => application.applicant === user?._id))
+
+          const hasApplied = res.data.job.applications?.some(
+            (application) => application.applicant === user?._id
+          );
+          setIsApplied(hasApplied);
+
+          console.log("User has applied:", hasApplied);
+          setIsApplied(hasApplied);
+        } else {
+          console.error("Job fetch failed or no job in response");
         }
       } catch (error) {
-        console.log(error);
-        toast.error('Failed to load job details.');
+        console.error("Fetch Job Error:", error);
+        toast.error('Failed to fetch job');
       }
     };
-    fetchSingleJob();
-  }, [jobId, dispatch, user?._id]);
+
+    fetchJob(); // Always fetch the job, even if user is not loaded yet
+  }, [jobId, user?._id, dispatch]);
+
+  // Optional loading UI
+  if (!singleJob) {
+    return (
+      <div className="text-center my-10">
+        <p className="text-xl">Loading job details...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-5xl mx-auto my-12 px-4">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">{singleJob?.title}</h1>
+          <h1 className="text-3xl font-bold text-gray-800">{singleJob?.title ?? 'No title found'}</h1>
           <div className="flex flex-wrap gap-3 mt-3">
             <Badge className="bg-teal-100 text-teal-700 font-semibold px-3 py-1 rounded-full text-sm hover:bg-teal-600 hover:text-white transition-colors duration-200">
               {singleJob?.position} Position(s)
@@ -69,6 +103,7 @@ const JobDescription = () => {
             </Badge>
           </div>
         </div>
+
         <Button
           onClick={isApplied ? null : applyJobHandler}
           disabled={isApplied}
