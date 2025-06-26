@@ -25,7 +25,6 @@ const JobDescription = () => {
       if (res.data.success) {
         setIsApplied(true);
 
-        // Update job in Redux with new applicant
         const updatedJob = {
           ...singleJob,
           applications: [...(singleJob.applications || []), { applicant: user?._id }],
@@ -35,17 +34,17 @@ const JobDescription = () => {
         toast.success(res.data.message);
       }
     } catch (error) {
-    const errorMessage = error?.response?.data?.message;
+      const errorMessage = error?.response?.data?.message;
 
-    // If already applied, still update state
-    if (errorMessage?.toLowerCase().includes('already applied')) {
-      setIsApplied(true);
+      if (errorMessage?.toLowerCase().includes('already applied')) {
+        setIsApplied(true); // ✅ still mark as applied
+      }
+
+      toast.error(errorMessage || 'Something went wrong');
     }
+  };
 
-    toast.error(errorMessage || 'Something went wrong');
-  }
-};
-
+  // Fetch job once, no matter if user is ready
   useEffect(() => {
     const fetchJob = async () => {
       try {
@@ -53,32 +52,35 @@ const JobDescription = () => {
           withCredentials: true,
         });
 
-        console.log("Job fetch response:", res.data);
-
         if (res.data.success && res.data.job) {
           dispatch(setSingleJob(res.data.job));
-
-          const hasApplied = res.data.job.applications?.some(
-            (application) => application.applicant === user?._id
-          );
-          setIsApplied(hasApplied);
-
-          console.log("User has applied:", hasApplied);
-          setIsApplied(hasApplied);
-        } else {
-          console.error("Job fetch failed or no job in response");
         }
       } catch (error) {
-        console.error("Fetch Job Error:", error);
         toast.error('Failed to fetch job');
       }
     };
 
-    fetchJob(); // Always fetch the job, even if user is not loaded yet
-  }, [jobId, user?._id, dispatch]);
+    fetchJob();
+  }, [jobId, dispatch]);
 
-  // Optional loading UI
-  if (!singleJob) {
+ // ✅ Check isApplied after both user and singleJob are available
+useEffect(() => {
+  if (!user?._id || !singleJob) return;
+
+  console.log("👤 User loaded:", user);
+  console.log("📄 Job loaded:", singleJob);
+
+  const hasApplied = singleJob.applications?.some(
+    (application) =>
+      application.applicant === user._id || application.applicant?._id === user._id
+  );
+
+  console.log("✅ Has applied:", hasApplied);
+  setIsApplied(hasApplied);
+}, [user?._id, singleJob?._id]); // ✅ Depend on singleJob._id instead of entire object
+
+
+  if (!singleJob || Object.keys(singleJob).length === 0) {
     return (
       <div className="text-center my-10">
         <p className="text-xl">Loading job details...</p>

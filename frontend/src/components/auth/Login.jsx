@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../shared/Navbar';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -13,6 +13,8 @@ import { setLoading, setUser } from '@/redux/authSlice';
 import { Loader2 } from 'lucide-react';
 import { store } from '@/redux/store';
 
+
+
 const Login = () => {
   const [input, setInput] = useState({
     email: '',
@@ -23,6 +25,10 @@ const Login = () => {
   const { loading } = useSelector(store => store.auth);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+ useEffect(() => {
+  dispatch(setLoading(false));
+}, [dispatch]);
 
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
