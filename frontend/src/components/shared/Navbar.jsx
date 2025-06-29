@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@radix-ui/react-popover';
+} from '@/components/ui/popover'; // If using Shadcn UI
 import { Avatar, AvatarImage, AvatarFallback } from '@radix-ui/react-avatar';
 import { Button } from '../ui/button';
 import { Link, useNavigate } from 'react-router-dom';
@@ -12,31 +12,22 @@ import { setUser } from '@/redux/authSlice';
 import { USER_API_END_POINT } from '@/utils/constant';
 import { toast } from 'sonner';
 import axios from 'axios';
-import { persistor } from '@/redux/store';
-import { store } from '@/redux/store';
 
 const Navbar = () => {
   const { user } = useSelector((store) => store.auth);
   const isAuthenticated = user !== null;
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
-  const profilePhoto =
-    user?.profile?.profilePhoto?.trim() !== ''
-      ? user?.profile.profilePhoto
-      : `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.fullname || 'User')}&background=0D8ABC&color=fff`;
-
-  useEffect(() => {
-    console.log('Redux Auth State:', { user, isAuthenticated });
-    console.log('User from Redux: ', user);
-    console.log('Type: ', typeof user);
-    console.log('Is Authenticated', isAuthenticated);
-    console.log('Keys: ', Object.keys(user || {}));
-    console.log('Global Redux Auth User:', store.getState().auth.user);
-  }, [user, isAuthenticated]);
+ const profilePhoto =
+  user?.profile?.profilePhoto?.trim?.() !== ''
+    ? user?.profile?.profilePhoto
+    : `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.fullname || 'User')}&background=0D8ABC&color=fff`;
 
   const logoutHandler = async () => {
     try {
+      setLoading(true);
       const res = await axios.get(`${USER_API_END_POINT}/logout`, {
         withCredentials: true,
       });
@@ -46,8 +37,9 @@ const Navbar = () => {
         toast.success(res.data.message);
       }
     } catch (error) {
-      console.log(error);
-      toast.error(error.response.data.message);
+      toast.error(error?.response?.data?.message || 'Logout failed.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -55,42 +47,67 @@ const Navbar = () => {
     <div className="bg-white shadow">
       <div className="flex items-center justify-between mx-auto max-w-7xl h-16 px-4">
         {/* Logo */}
-        <h1 className="text-2xl ml-20 font-bold text-[#008E97]">
+        <h1 className=" ml-20 text-2xl font-bold text-[#008E97]">
           Careers<span className="text-[#0b2527]">Nepal</span>
         </h1>
 
-        {/* Navigation + Auth/Profile */}
-        <div className="flex items-center gap-6">
-          <ul className="flex font-medium items-center gap-10">
-            <li className="cursor-pointer transition duration-300 relative group">
-              <Link
-                to="/"
-                className="inline-block text-[#008e97] group-hover:text-black transition-colors duration-300"
-              >
-                Home
-                <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full"></span>
-              </Link>
-            </li>
-            <li className="cursor-pointer transition duration-300 relative group">
-              <Link
-                to="/jobs"
-                className="inline-block text-[#008e97] group-hover:text-black transition-colors duration-300"
-              >
-                Jobs
-                <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full"></span>
-              </Link>
-            </li>
-            <li className="cursor-pointer transition duration-300 relative group">
-              <Link
-                to="/browse"
-                className="inline-block text-[#008e97] group-hover:text-black transition-colors duration-300"
-              >
-                Browse
-                <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full"></span>
-              </Link>
-            </li>
-          </ul>
+        {/* Right Section: Nav + Profile */}
+        <div className="flex items-center gap-3">
+          {/* Navigation */}
+          {user && user.role === 'recruiter' ? (
+            <ul className="flex font-medium items-center gap-6 shrink-0">
+              <li className="cursor-pointer transition duration-300 relative group">
+                <Link
+                  to="/admin/companies"
+                  className="inline-block text-[#008e97] group-hover:text-black transition-colors duration-300"
+                >
+                  Companies
+                  <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full"></span>
+                </Link>
+              </li>
+              <li className="cursor-pointer transition duration-300 relative group">
+                <Link
+                  to="/admin/jobs"
+                  className="inline-block text-[#008e97] group-hover:text-black transition-colors duration-300"
+                >
+                  Jobs
+                  <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full"></span>
+                </Link>
+              </li>
+            </ul>
+          ) : (
+            <ul className="flex font-medium items-center gap-6 shrink-0">
+              <li className="cursor-pointer transition duration-300 relative group">
+                <Link
+                  to="/"
+                  className="inline-block text-[#008e97] group-hover:text-black transition-colors duration-300"
+                >
+                  Home
+                  <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full"></span>
+                </Link>
+              </li>
+              <li className="cursor-pointer transition duration-300 relative group">
+                <Link
+                  to="/jobs"
+                  className="inline-block text-[#008e97] group-hover:text-black transition-colors duration-300"
+                >
+                  Jobs
+                  <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full"></span>
+                </Link>
+              </li>
+              <li className="cursor-pointer transition duration-300 relative group">
+                <Link
+                  to="/browse"
+                  className="inline-block text-[#008e97] group-hover:text-black transition-colors duration-300"
+                >
+                  Browse
+                  <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full"></span>
+                </Link>
+              </li>
+            </ul>
+          )}
 
+          {/* Auth / Profile */}
           {!isAuthenticated ? (
             <div className="flex items-center gap-2">
               <Link to="/login">
@@ -126,7 +143,6 @@ const Navbar = () => {
                     alt={user?.fullname || 'User'}
                     className="w-10 h-10 rounded-full"
                   />
-
                   <div className="group cursor-pointer">
                     <p className="font-semibold text-[#008e97] transition-all duration-300 transform group-hover:text-[#183f42] group-hover:scale-105 inline-block">
                       {user?.fullname || 'User'}
@@ -136,20 +152,29 @@ const Navbar = () => {
                 </div>
                 <hr className="my-2" />
                 <div className="space-y-2 text-sm">
-                  <Link
+
+        {
+          user && user.role  === 'student' && (
+             <Link
                     to="/profile"
-                    className="flex items-center gap-2 [#217272] hover:text-[#000000]"
+                    className="flex items-center gap-2 hover:text-[#000000]"
                   >
                     <span>👤</span>
                     <span> View Profile</span>
                   </Link>
-
+          )
+        }
+        
                   <div
                     onClick={logoutHandler}
-                    className="flex items-center gap-2 cursor-pointer [#217272] hover:text-[#000000] font-semibold text-[#217272]"
+                    className={`flex items-center gap-2 cursor-pointer font-semibold ${
+                      loading
+                        ? 'opacity-50 cursor-not-allowed'
+                        : 'text-[#217272] hover:text-black'
+                    }`}
                   >
                     <span>🚪</span>
-                    <span>Logout</span>
+                    <span>{loading ? 'Logging out...' : 'Logout'}</span>
                   </div>
                 </div>
               </PopoverContent>
