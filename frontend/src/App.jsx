@@ -9,6 +9,7 @@ import JobDescription from './components/JobDescription';
 import Companies from './components/admin/Companies';
 import CompanyCreate from './components/admin/CompanyCreate';
 import CompanySetup from './components/admin/CompanySetup';
+import { Toaster } from 'react-hot-toast';
 
 const appRouter = createBrowserRouter([
   {
@@ -58,6 +59,7 @@ export default function App() {
   return (
     <>
     <RouterProvider router = {appRouter}/>
+    <Toaster position="top-right" reverseOrder={false} />
     </>
   );
 }

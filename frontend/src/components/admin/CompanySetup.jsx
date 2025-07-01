@@ -6,6 +6,9 @@ import { Label } from '../ui/label'
 import { Input } from '../ui/input'
 import { COMPANY_API_END_POINT } from '@/utils/constant'
 import { useNavigate, useParams } from 'react-router-dom'
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
+
 
 const CompanySetup = () => {
   const [input, setInput] = useState({
@@ -16,7 +19,7 @@ const CompanySetup = () => {
     file: null
   });
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const params = useParams();
   const navigate = useNavigate();
 
@@ -26,23 +29,23 @@ const CompanySetup = () => {
 
   const changeFileHandler = (e) => {
     const file = e.target.files?.[0];
-    setInput({input, file});
+    setInput({...input, file});
   }
 
   const submitHandler = async(e) => {
     e.preventDefault();
     const formData = new FormData();
-    formData.append("name". input.name);
-    formData.append("description". input.description);
-    formData.append("website". input.website);
-    formData.append("location". input.location);
+    formData.append("name", input.name);
+    formData.append("description", input.description);
+    formData.append("website", input.website);
+    formData.append("location", input.location);
     
     if(input.file){
-      formData.append("file". input.file);
+      formData.append("file", input.file);
     }
      try {
       setLoading(true);
-      const res = await axios.put(`${COMPANY_API_END_POINT}/update/${[params.id]}`,formData, {
+      const res = await axios.put(`${COMPANY_API_END_POINT}/update/${params.id}`,formData, {
         headers:{
           'Content-Type' : 'multipart/form-data'
         },
@@ -50,7 +53,7 @@ const CompanySetup = () => {
       });
       if(res.data.success){
         toast.success(res.data.message);
-        navigate("admin/companies")
+        navigate("/admin/companies")
       }
      } catch (error) {
       console.log(error);
@@ -69,7 +72,7 @@ const CompanySetup = () => {
             <Button 
              onClick={() => navigate("/admin/companies")}
             variant='outline' 
-            clasName='flex items-center gap-2 text-gray-500 font-semibold'>
+            className='flex items-center gap-2 text-gray-500 font-semibold'>
               <ArrowLeft />
               <span>Back</span></Button>
             <h1 className='font-bold text-xl'>Company Setup</h1>

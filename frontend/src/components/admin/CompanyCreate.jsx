@@ -6,16 +6,21 @@ import { Button } from '../ui/button'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { setSingleCompany } from '@/redux/companySlice'
+import axios from 'axios'
+import toast from 'react-hot-toast'
+import { COMPANY_API_END_POINT } from '@/utils/constant';
+
 
 const CompanyCreate = () => {
   const navigate = useNavigate();
-  const [companyName, setCompanyName] = useState();
+  const [companyName, setCompanyName] = useState('');
   const dispatch = useDispatch();
 
   const registerNewCompany = async () => {
+    console.log("Register button clicked");
     try {
       const res = await axios.post(`${COMPANY_API_END_POINT}/register`, {companyName}, {
-        header :{
+        headers :{
           'Content-Type': "application/json"
         },
         withCredentials:true
@@ -50,7 +55,7 @@ const CompanyCreate = () => {
         />
         <div className='flex items-center gap-2 my-10'>
           <Button variant='outline' onClick={ () => navigate('/admin/companies')}>Cancel</Button>
-          <Button onClick={()=> registerNewCompany} >Continue</Button>
+          <Button onClick={()=> registerNewCompany()} >Continue</Button>
         </div>
       </div>
     </div>
