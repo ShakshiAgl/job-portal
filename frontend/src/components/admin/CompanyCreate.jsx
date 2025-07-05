@@ -10,7 +10,6 @@ import axios from 'axios'
 import toast from 'react-hot-toast'
 import { COMPANY_API_END_POINT } from '@/utils/constant';
 
-
 const CompanyCreate = () => {
   const navigate = useNavigate();
   const [companyName, setCompanyName] = useState('');
@@ -19,7 +18,7 @@ const CompanyCreate = () => {
   const registerNewCompany = async () => {
     console.log("Register button clicked");
     try {
-      const res = await axios.post(`${COMPANY_API_END_POINT}/register`, {companyName}, {
+      const res = await axios.post(`${COMPANY_API_END_POINT}/register`, {companyName:companyName}, {
         headers :{
           'Content-Type': "application/json"
         },
