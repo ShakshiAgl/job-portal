@@ -1,4 +1,5 @@
 import { Job } from "../models/job.model.js";
+import mongoose from "mongoose";
 
 export const postJob = async (req, res) => {
   try {
@@ -81,7 +82,10 @@ export const getJobById = async (req, res) => {
 export const getAdminJobs = async (req, res) => {
   try {
     const adminId = req.id;
-    const jobs = await Job.find({ created_by: adminId });
+    const jobs = await Job.find({ created_by: adminId }).populate({
+      path:'company',
+      createdAt:-1
+    });
     if (!jobs) {
       return res.status(404).json({
         message: "Jobs not found",
@@ -96,3 +100,27 @@ export const getAdminJobs = async (req, res) => {
     console.log(error);
   }
 }
+
+
+// export const getAdminJobs = async (req, res) => {
+//   try {
+//     const adminId = new mongoose.Types.ObjectId(req.id);
+//     const jobs = await Job.find({ created_by: adminId }).populate("company");
+
+//     if (!jobs || jobs.length === 0) {
+//       return res.status(404).json({
+//         message: "Jobs not found",
+//         success: false
+//       });
+//     }
+
+//     return res.status(200).json({
+//       jobs,
+//       success: true
+//     });
+
+//   } catch (error) {
+//     console.log("Error in getAdminJobs:", error.message);
+//     res.status(500).json({ success: false, message: "Internal Server Error" });
+//   }
+// };
