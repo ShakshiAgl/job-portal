@@ -163,3 +163,57 @@ export const updateStatus = async (req, res) => {
     });
   }
 };
+
+export const checkIfApplied = async (req, res) => {
+  const { userId, jobId } = req.query;
+
+  if (!userId || !jobId) {
+    return res.status(400).json({
+      message: "Missing userId or jobId",
+      success: false
+    });
+  }
+
+  try {
+    const existingApplication = await Application.findOne({
+      job: jobId,
+      applicant: userId,
+    });
+
+    return res.status(200).json({
+      applied: !!existingApplication,
+      success: true,
+    });
+
+  } catch (error) {
+    console.error("Error checking application:", error);
+    return res.status(500).json({
+      message: "Internal server error",
+      success: false,
+    });
+  }
+};
+
+// export const checkIfApplied = async (req, res) => {
+//   try {
+//     const jobId = req.params.id;
+//     const userId = req.id;
+
+//     const existingApplication = await Application.findOne({
+//       job: jobId,
+//       applicant: userId,
+//     });
+
+//     return res.status(200).json({
+//       hasApplied: !!existingApplication,
+//       success: true,
+//     });
+
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({
+//       message: "Internal server error",
+//       success: false,
+//     });
+//   }
+// };

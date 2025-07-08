@@ -24,7 +24,7 @@ const CompaniesTable = () => {
     return (
         <div>
             <Table>
-                <TableCaption>A list of your recent registered companies</TableCaption>
+                <TableCaption>A list of your recently registered companies</TableCaption>
                 <TableHeader>
                     <TableRow>
                         <TableHead>Logo</TableHead>
