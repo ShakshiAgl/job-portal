@@ -51,8 +51,10 @@ const Login = () => {
      if (res.data.success) {
   const userData = res.data.user;
 
+  console.log(userData)
   // 🧼 Ensure consistent structure for Redux
   const cleanedUser = {
+    _id: userData._id,
     fullname: userData.fullname,
     role: userData.role,
     profile: {

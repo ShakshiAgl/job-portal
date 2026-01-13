@@ -43,7 +43,7 @@ const JobDescription = () => {
       toast.success(res.data.message);
     }
   } catch (error) {
-    console.log("💥 APPLY JOB ERROR:", error.response?.data || error.message || error);
+    console.log(" APPLY JOB ERROR:", error.response?.data || error.message || error);
     const errorMessage = error?.response?.data?.message;
 
     if (errorMessage?.toLowerCase().includes("already applied")) {
@@ -57,6 +57,7 @@ const JobDescription = () => {
 
   // Fetch job once, no matter if user is ready
   useEffect(() => {
+    console.log(jobId)
     const fetchJob = async () => {
       try {
         const res = await axios.get(`${JOB_API_END_POINT}/get/${jobId}`, {
@@ -70,11 +71,13 @@ const JobDescription = () => {
         toast.error('Failed to fetch job');
       }
     };
-
+ 
     fetchJob();
   }, [jobId, dispatch]);
 
 useEffect(() => {
+    console.log(user)
+  console.log(singleJob)
   if (!user?._id || !singleJob) return;
 
   const hasApplied = singleJob.applications?.some(
@@ -83,27 +86,7 @@ useEffect(() => {
   );
 
   setIsApplied(hasApplied);
-}, [user?._id, singleJob?.applications]);
-
-useEffect(() => {
-  const checkIfApplied = async () => {
-    if (!user?._id || !jobId) return;
-
-    try {
-      const res = await axios.get(`${APPLICATION_API_END_POINT}/check`, {
-        params: { userId: user._id, jobId },
-        withCredentials: true,
-      });
-
-      setIsApplied(res.data.applied);
-    } catch (err) {
-      console.error("Error checking if already applied", err);
-    }
-  };
-
-  checkIfApplied();
-}, [user?._id, jobId]);
-
+}, [user, singleJob]); 
 
 
   if (!singleJob || Object.keys(singleJob).length === 0) {
